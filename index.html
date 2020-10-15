@@ -6,17 +6,27 @@
   <title>英语练习</title>
 </head>
 <body>
+  <!-- 当前题数 -->
+  <div id="num">
+
+  </div>
   <div class="box">
     <div id="question">1</div>
   </div>
-  <div style="    text-align: right;">
+  <div style="text-align: right;">
     <a id="btn">下一题</a>
   </div>
+  <!-- 消息提示 -->
   <div id="msg">
 
   </div>
+  <!-- 答案选项 -->
   <div id="answer">
 
+  </div>
+  <!-- 错题列表 -->
+  <div id="error">
+    <h2>错题列表：</h2>
   </div>
 </body>
 <script>
@@ -170,17 +180,72 @@
     cont:`had seen`
   }];
   let nowId = -1,
+  nowquestion = '',
+  nowIndex = -1,
   question = document.getElementById('question'),
   btn = document.getElementById('btn'),
   answer = document.getElementById('answer'),
-  msg = document.getElementById('msg');
+  error = document.getElementById('error'),
+  num = document.getElementById('num'),
+  msg = document.getElementById('msg'),
+  newAnswerList = mess(answerList),
+  newquestionList = mess(questionList);
+
+  getquestion()
+  btn.addEventListener('click',function(){
+    getquestion()
+  },false);
+
+  
+  for (var i=0; i<newAnswerList.length; i++){
+    let span = document.createElement('h4')
+    span.innerHTML = newAnswerList[i].cont
+    answer.appendChild(span)
+  }
+
+  window.onload = function(){
+    answer.onclick = function(){
+      var ev = ev || window.event;
+      var target = ev.target || ev.srcElement;
+      if(target.nodeName == 'H4'){
+        var cont = target.innerText;
+        var answerId = answerList.filter(item => item.cont === cont)[0].id;
+        if(answerId == nowId){
+          // alert('正确')
+          // debugger
+          if(msg.innerHTML.includes('错误')){
+            let errorDiv = document.createElement('div')
+            errorDiv.innerHTML = `${nowquestion}<span style="color:green">----------${cont}</span>`;
+            error.appendChild(errorDiv)
+          }
+          msg.innerHTML = `<div style="text-align: center;color:green">正确</div>`
+          setTimeout(()=>{
+            getquestion()
+          },1000)
+        }else {
+          msg.innerHTML = '<div style="text-align: center;color:red">错误</div>'
+
+          let errorDiv = document.createElement('div')
+          errorDiv.innerHTML = `${nowquestion}<span style="color:red">----------${cont}</span>`;
+          error.appendChild(errorDiv)
+        }
+　　　}
+    }
+  }
 
   // 随机获取题目
   function getquestion() {
-    let random = randomNum(0,questionList.length-1)
-    console.log(random)
-    nowId = questionList[random].id
-    question.innerHTML = questionList[random].cont
+
+    if(nowIndex < newquestionList.length-1){
+      nowIndex++;
+    }else {
+      nowIndex = 0;
+      newquestionList = mess(newquestionList)
+    }
+    
+    num.innerHTML = `共${newquestionList.length}道题，当前第${nowIndex+1}题。`
+    nowId = questionList[nowIndex].id
+    question.innerHTML = nowquestion = questionList[nowIndex].cont
     msg.innerHTML = ''
   }
   // 获取随机数
@@ -213,40 +278,6 @@
       }
     }
     return arr;
-  }
-
-  getquestion()
-  btn.addEventListener('click',function(){
-    getquestion()
-  },false);
-
-  let newAnswerList = mess(answerList)
-  for (var i=0; i<newAnswerList.length; i++){
-    let span = document.createElement('h4')
-    span.innerHTML = newAnswerList[i].cont
-    answer.appendChild(span)
-  }
-
-  window.onload = function(){
-    answer.onclick = function(){
-      var ev = ev || window.event;
-      var target = ev.target || ev.srcElement;
-      if(target.nodeName == 'H4'){
-        var cont = target.innerText;
-        console.log(cont,answerList.filter(item => item.cont === cont),answerList.filter(item => item.cont === cont)[0].id)
-        var answerId = answerList.filter(item => item.cont === cont)[0].id;
-        console.log(answerId,nowId)
-        if(answerId == nowId){
-          // alert('正确')
-          msg.innerHTML = `<div style="text-align: center;color:green">正确</div>`
-          setTimeout(()=>{
-            getquestion()
-          },1000)
-        }else {
-          msg.innerHTML = '<div style="text-align: center;color:red">错误</div>'
-        }
-　　　}
-    }
   }
 </script>
 </html>
@@ -282,5 +313,8 @@ h4 {
 }
 #msg {
   height:10px;
+}
+#num {
+  text-align: center;
 }
 </style>
